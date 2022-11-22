@@ -1,0 +1,100 @@
+1. download virtualbox from https://www.virtualbox.org/wiki/Downloads
+ - windows hosts > https://download.virtualbox.org/virtualbox/7.0.4/VirtualBox-7.0.4-154605-Win.exe
+ - run install
+ - open Oracle VM VirtualBox Manager
+ - download ubuntu 20.04 server  from https://ubuntu.com/download/server
+2. Click 'New'
+ - Name: OBVM-v1
+ - iso image: ubuntu-20.04.5-live-server-amd64.iso
+ - guest install settings : vboxuser, pw: changeme, hostname: OBVM, domain name: myguest.virtualbox.org
+ - default hardware settings
+ - default virtual hard disk
+ 3. Power up virtual machine (new window turns on automatically)
+ - install OS using default settings, continue without updating to the new installer server
+  - done, done, done, done, continue
+> Network connections
+> DHCPv4 10.0.2.15/24
+ - your name: obsuser			
+ - your server's name: obvmserver
+ - pick a username: obsuser, pw: password
+ - install openssh server
+ - skip popular server installs
+ - installing server... this takes a few min
+> reboot now - hit enter
+ -obvmserver login: obsuser, pw: password
+ 4. Now have access to fresh install with terminal (Take Snapshot)
+ 4.1 Settings > Network > Adapter 1 > change attached to : to 'Bridged Adapter'
+ 5. run the following commands
+ --update 
+sudo apt-get update
+sudo apt install ssh 
+ 
+ --find ipaddress for virtualbox
+ sudo apt install net-tools
+ ifconfig
+ - write down ip address
+ 199.247.136.108
+ 
+  -- download installer sh file
+ wget https://raw.githubusercontent.com/brookgagnon/ob-install/main/ubuntu-focal.sh
+ 
+ -- set execute permission on your script using chmod
+ chmod +x ubuntu-focal.sh
+ sudo bash ubuntu-focal.sh
+ type: install
+ >what is the FQDN? 199.247.136.108
+ >what email address? ob@example.com
+ > Do you want to use https with lets encrypt? No
+ 
+
+- change openbroadcaster login password
+sudo -u ob php /home/ob/www/tools/password_change.php admin password
+
+6. Log into OpenBroadcaster
+ - from web browser, type in your server's IP address to the address bar 
+ - 199.247.136.42
+ 
+7. Log in via winscp
+- file protocol: sftp
+- ip address: 199.247.136.42
+- port: 22
+
+
+
+9. Connect to database from DBeaver
+-create user account to connect to database
+sudo mysql
+mysql> GRANT ALL PRIVILEGES ON *.* TO root@'Y001816.YNet.gov.yk.ca' IDENTIFIED BY 'password';
+mysql> FLUSH PRIVILEGES;
+ctrl+c to exit
+
+- get database connection properties from /home/ob/www.config.php
+define('OB_DB_USER','ob');
+define('OB_DB_PASS','9gqdtw2g6vfo5ozi0jblhjd6bbr0mmui');
+define('OB_DB_HOST','localhost');
+define('OB_DB_NAME','ob');
+
+sudo chmod +rwx /etc/mysql/mariadb.conf.d/50-server.cnf
+sudo chmod 777 /etc/mysql/mariadb.conf.d/
+- open file in winscp, change bind-variable to 0.0.0.0
+sudo service mysqld restart
+
+New database connection
+server host: 199.247.136.42
+port:3306
+database: ob
+username: root
+password: password
+
+
+8. Turn on OBPlayer
+cd /usr/share/
+sudo git clone https://github.com/openbroadcaster/obplayer.git
+sudo ufw allow 23233
+cd obplayer
+sudo apt-get install python3-pip
+
+
+
+
+ 
