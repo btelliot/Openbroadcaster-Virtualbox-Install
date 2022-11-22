@@ -24,6 +24,8 @@
  -obvmserver login: obsuser, pw: password
  4. Now have access to fresh install with terminal (Take Snapshot)
  4.1 Settings > Network > Adapter 1 > change attached to : to 'Bridged Adapter'
+ 4.2 Allow copy and paste into virtual box
+	Settings > Advanced > Shared Clipboard: Bidirectional
  5. run the following commands
  --update 
 sudo apt-get update
@@ -52,16 +54,99 @@ sudo -u ob php /home/ob/www/tools/password_change.php admin password
 
 6. Log into OpenBroadcaster
  - from web browser, type in your server's IP address to the address bar 
- - 199.247.136.42
+ - 199.247.136.108
+ - login: 
+	- username: admin
+	- password: password
  
 7. Log in via winscp
 - file protocol: sftp
-- ip address: 199.247.136.42
+- ip address: 199.247.136.108
 - port: 22
 
+8. Turn on OBPlayer
+ - documentation from here: https://docs.google.com/document/d/1h3a_yZlckLKqcIAqnZJcBsq_GPq13adNyQdjYTHbBps/edit
+ - Open windows powershell
+ssh obsuser@199.247.136.108
+ - install open broadcaster player dependencies
+ sudo apt install ntp python3 python3-pycurl python3-openssl python3-apsw python3-magic python3-dateutil python3-requests python3-gi python3-gi-cairo python3-pip python3-serial python3-gst-1.0 gir1.2-gtk-3.0 gir1.2-gdkpixbuf-2.0 gir1.2-pango-1.0 gir1.2-gstreamer-1.0 gir1.2-gst-plugins-base-1.0 gir1.2-gst-rtsp-server-1.0 gstreamer1.0-tools gstreamer1.0-libav gstreamer1.0-alsa gstreamer1.0-pulseaudio gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-vaapi mesa-vdpau-drivers espeak cifs-utils 
+ 
+ - install git cli
+type -p curl >/dev/null || sudo apt install curl -y
+curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+&& sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
+&& echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+&& sudo apt update \
+&& sudo apt install gh -y
+ 
+- install more dependencies
+git clone https://git.ffmpeg.org/ffmpeg.git ffmpeg
+
+sudo pip3 install passlib passlib[bcrypt] apsw
+
+gh auth login
+>github.com
+>https
+>Y
+-Login with browser
+-type https://github.com/login/device into chrome
+-use one-time access code given in powershell
+
+gh repo clone GStreamer/gstreamer-vaapi
+sudo apt-get update -y
+sudo apt-get install -y mesa-vdpau-drivers
+sudo pip3 install boto3
+sudo apt install python3-serial
+sudo apt install cifs-utils
+sudo pip3 install pulsectl
+sudo pip3 install pyrtlsdr
+sudo pip3 install inotify
+ 
+sudo mkdir /usr/share/obplayer
+cd /usr/share
+
+sudo git clone https://github.com/openbroadcaster/obplayer.git
+sudo ufw allow 23233
+cd obplayer
+
+sudo bash obplayer_check
+
+open chrome to 199.247.136.108:23233
+username: admin
+password: admin
+
+go to http(s) admin
+change password to password
+save
+
+9. Connect obplayer to observer
+open chrome to 199.247.136.108
+Admin> player manager> new
+
+name: obplayer
+ip address: 199.247.136.108
+password: password
+Toggle all media types
+Timezone Yukon
 
 
-9. Connect to database from DBeaver
+10. Upload content to observer
+added music
+added station id
+created playlist
+modified default playlist for OBplayer to the new playlist
+
+11. Provision the player
+go to 199.247.136.108:23233
+go to sync/media
+Device ID needs to match the device ID generated in the player manager
+Password is password
+syncurl: http://199.247.136.108/remote.php
+save
+go to admin > delete db and restart
+
+
+12. Connect to database from DBeaver
 -create user account to connect to database
 sudo mysql
 mysql> GRANT ALL PRIVILEGES ON *.* TO root@'Y001816.YNet.gov.yk.ca' IDENTIFIED BY 'password';
@@ -87,12 +172,7 @@ username: root
 password: password
 
 
-8. Turn on OBPlayer
-cd /usr/share/
-sudo git clone https://github.com/openbroadcaster/obplayer.git
-sudo ufw allow 23233
-cd obplayer
-sudo apt-get install python3-pip
+
 
 
 
