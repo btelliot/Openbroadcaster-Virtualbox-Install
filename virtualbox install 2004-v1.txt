@@ -12,6 +12,9 @@
  3. Power up virtual machine (new window turns on automatically)
  - install OS using default settings, continue without updating to the new installer server
   - done, done, done, done, continue
+  
+- virtualbox - change settings to 4 cores, and 8gb of ram
+
 > Network connections
 > DHCPv4 10.0.2.15/24
  - your name: obsuser			
@@ -38,7 +41,7 @@ sudo apt install ssh
  199.247.136.108
  
   -- download installer sh file
- wget https://raw.githubusercontent.com/brookgagnon/ob-install/main/ubuntu-focal.sh
+ wget https://raw.githubusercontent.com/brookgagnon/ob-install/main/ubuntu-focal.sh --no-check-certificate
  
  -- set execute permission on your script using chmod
  chmod +x ubuntu-focal.sh
@@ -64,7 +67,7 @@ sudo -u ob php /home/ob/www/tools/password_change.php admin password
 - ip address: 199.247.136.108
 - port: 22
 
-8. Turn on OBPlayer
+8. Download and install OBPlayer
  - documentation from here: https://docs.google.com/document/d/1h3a_yZlckLKqcIAqnZJcBsq_GPq13adNyQdjYTHbBps/edit
  - Open windows powershell
 ssh obsuser@199.247.136.108
@@ -73,7 +76,7 @@ ssh obsuser@199.247.136.108
  
  - install git cli
 type -p curl >/dev/null || sudo apt install curl -y
-curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+curl -k -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
 && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
 && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
 && sudo apt update \
@@ -105,11 +108,12 @@ sudo pip3 install inotify
 sudo mkdir /usr/share/obplayer
 cd /usr/share
 
-sudo git clone https://github.com/openbroadcaster/obplayer.git
+sudo git config --global http.sslverify false
+sudo git clone https://github.com/openbroadcaster/obplayer.git --branch rtmp-changes
 sudo ufw allow 23233
 cd obplayer
 
-sudo bash obplayer_check
+sudo bash obplayer_loop -d
 
 open chrome to 199.247.136.108:23233
 username: admin
@@ -138,10 +142,10 @@ modified default playlist for OBplayer to the new playlist
 
 11. Provision the player
 go to 199.247.136.108:23233
-go to sync/media
+go to sync/media	
 Device ID needs to match the device ID generated in the player manager
 Password is password
-syncurl: http://199.247.136.108/remote.php
+sync url: http://199.247.136.108/remote.php
 save
 go to admin > delete db and restart
 
@@ -153,24 +157,54 @@ mysql> GRANT ALL PRIVILEGES ON *.* TO root@'Y001816.YNet.gov.yk.ca' IDENTIFIED B
 mysql> FLUSH PRIVILEGES;
 ctrl+c to exit
 
-- get database connection properties from /home/ob/www.config.php
-define('OB_DB_USER','ob');
-define('OB_DB_PASS','9gqdtw2g6vfo5ozi0jblhjd6bbr0mmui');
-define('OB_DB_HOST','localhost');
-define('OB_DB_NAME','ob');
 
-sudo chmod +rwx /etc/mysql/mariadb.conf.d/50-server.cnf
 sudo chmod 777 /etc/mysql/mariadb.conf.d/
 - open file in winscp, change bind-variable to 0.0.0.0
 sudo service mysqld restart
 
 New database connection
-server host: 199.247.136.42
+server host: 199.247.136.108
 port:3306
 database: ob
 username: root
 password: password
 
+
+13. Install Icecast
+- from https://www.vultr.com/docs/install-icecast-on-ubuntu-20-04/
+sudo apt update
+sudo apt upgrade
+sudo apt install icecast2
+> yes
+> Icecast2 hostname: localhost
+> icecast 2 source password: password
+> Icecast2 relay password: password
+> icecast 2 administration password: password
+sudo systemctl enable icecast2
+sudo systemctl start icecast2
+
+sudo ufw allow 'nginx full'
+sudo ufw allow 8000/tcp
+sudo ufw reload
+
+- Icecast2 now installed
+chrome address bar: 199.247.136.108:8000
+ > administration: username: admin
+ password: password
+
+14. Enable streaming in obplayer
+make sure obplayer is running
+sudo bash /usr/share/obplayer/obplayer_loop -d
+
+Goto 199.247.136.108:23233
+username: admin
+password: admin
+Open streaming tab
+Enable Streaming [check]
+Audio Input Mode [Pulse Audio]
+Enable Icecast Streaming [check]
+Icecast One Output Bitrate - 320kbps
+Icecast One IP: 199.247.136.108:8000
 
 
 
