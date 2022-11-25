@@ -128,7 +128,7 @@ open chrome to 199.247.136.108
 Admin> player manager> new
 
 name: obplayer
-ip address: 199.247.136.108
+ip address: leave blank
 password: password
 Toggle all media types
 Timezone Yukon
@@ -142,7 +142,8 @@ modified default playlist for OBplayer to the new playlist
 
 11. Provision the player
 go to 199.247.136.108:23233
-go to sync/media	
+go to sync/media
+Enable the Scheduler [check]
 Device ID needs to match the device ID generated in the player manager
 Password is password
 sync url: http://199.247.136.108/remote.php
@@ -191,6 +192,8 @@ sudo ufw reload
 chrome address bar: 199.247.136.108:8000
  > administration: username: admin
  password: password
+ 
+sudo chmod +777 /etc/icecast2/icecast.xml
 
 14. Enable streaming in obplayer
 make sure obplayer is running
