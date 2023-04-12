@@ -199,15 +199,23 @@ sudo chmod +777 /etc/icecast2/icecast.xml
 make sure obplayer is running
 sudo bash /usr/share/obplayer/obplayer_loop -d
 
+!downgrade icecast package to avoid tunneling error
+gstreamer error: gst-resource-error-quark: could not connect to server (6) ....
+
+cd /tmp/ && wget http://mirrors.kernel.org/ubuntu/pool/main/libs/libshout/libshout3_2.4.1-2build1_amd64.deb && \
+sudo dpkg -i libshout3_2.4.1-2build1_amd64.deb && rm libshout3_2.4.1-2build1_amd64.deb
+sudo apt-mark hold libshout3
+
 Goto 199.247.136.108:23233
 username: admin
 password: admin
 Open streaming tab
 Enable Streaming [check]
-Audio Input Mode [Pulse Audio]
+Audio Input Mode [Intersync]
 Enable Icecast Streaming [check]
 Icecast One Output Bitrate - 320kbps
 Icecast One IP: 199.247.136.108:8000
+
 
 
 
