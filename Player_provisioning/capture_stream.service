@@ -1,0 +1,16 @@
+[Unit]
+Description=Capture RTP from QOR and Save as MP3 
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/capture_stream.sh
+Restart=always
+RestartSec=10
+User=obsuser
+Group=obsuser
+
+[Install]
+WantedBy=multi-user.target
+

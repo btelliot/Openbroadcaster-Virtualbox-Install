@@ -1,0 +1,32 @@
+provisioning script
+
+#create folder /media/obmedia
+sudo mkdir /media/obmedia
+sudo chmod 777 /media/obmedia
+sudo mkdir /media/obmedia/00_live_capture
+
+#change icecast pw
+sudo /etc/icecast2/icecast.xml
+
+#autostart icecast
+sudo systemctl enable icecast2 && systemctl start icecast2
+
+
+#move sh to /usr/local/bin
+sudo chmod 777 /usr/local/bin
+sudo chmod +x /usr/local/bin/capture_stream.sh
+sudo chmod +X /usr/local/bin/livewire_to_icecast.sh
+
+#copy service files to /etc/systemd/system/
+sudo chmod 777 /etc/systemd/system/
+>copy files
+sudo systemctl daemon-reload
+#start services
+sudo systemctl enable livewire_to_icecast.service && systemctl start livewire_to_icecast.service
+sudo systemctl enable capture_stream.service && systemctl start capture_stream.service
+
+
+“sudo nano /etc/network/interfaces”
+
+
+#copy fallback media
