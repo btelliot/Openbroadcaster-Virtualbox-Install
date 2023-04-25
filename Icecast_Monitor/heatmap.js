@@ -16,8 +16,8 @@ d3.csv(csvFile).then(data => {
 });
 
 
-// Summarize data by day of the week and hour of the day
-function summarizeData(data) {
+// Calculate Average Listeners for days of the week and hours of the day
+function summarizeDataAvg(data) {
   const listenerCounts = new Array(7).fill(0).map(() => new Array(24).fill(0));
   const dataPointCounts = new Array(7).fill(0).map(() => new Array(24).fill(0));
 
@@ -25,7 +25,7 @@ function summarizeData(data) {
     const timestamp = new Date(row.Timestamp);
     const day = timestamp.getDay();
     const hour = timestamp.getHours();
-    const listeners = parseInt(row.Listeners, 10);
+    const listeners = parseInt(row.ListenerPeak, 10);
 
     listenerCounts[day][hour] += listeners;
     dataPointCounts[day][hour] += 1;
@@ -37,6 +37,28 @@ function summarizeData(data) {
       return Math.round(dataPoints === 0 ? 0 : listenerCount / dataPoints);
     })
   );
+
+  return summaryData;
+}
+
+//calculatePeakListeners for days of the week and hours of the day
+function summarizeData(data) {
+  // Initialize the summary data structure
+  const summaryData = Array(7).fill().map(() => Array(24).fill(0));
+
+  data.forEach(row => {
+    // Check if the ListenersPeak value is not null
+    if (row.Listeners!== null) {
+      const date = new Date(row.Timestamp);
+      const day = (date.getDay() + 6) % 7; // Make Monday the first day of the week
+      const hour = date.getHours();
+
+      // Store the maximum ListenersPeak value for each day and hour
+      if (row.Listeners> summaryData[day][hour]) {
+        summaryData[day][hour] = row.Listeners-3;
+      }
+    }
+  });
 
   return summaryData;
 }
@@ -78,7 +100,7 @@ function renderHeatmap(summaryData) {
             tooltip.transition()
               .duration(200)
               .style('opacity', .9);
-            tooltip.html(`Hour: ${event.target.parentNode.firstChild.textContent}<br/>Listeners: ${d}`)
+            tooltip.html(`Hour: ${event.target.parentNode.firstChild.textContent}<br/>Peak Listeners: ${d}`)
               .style('left', (event.pageX + 10) + 'px')
               .style('top', (event.pageY - 28) + 'px');
           }

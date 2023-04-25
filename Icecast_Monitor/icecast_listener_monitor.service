@@ -1,0 +1,16 @@
+[Unit]
+Description=Monitor Icecast for listener
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/icecast_listener_monitor.sh
+Restart=always
+RestartSec=10
+User=obsuser
+Group=obsuser
+
+[Install]
+WantedBy=multi-user.target
+
