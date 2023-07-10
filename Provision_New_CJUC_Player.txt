@@ -15,18 +15,23 @@ sudo systemctl enable icecast2 && systemctl start icecast2
 #move sh to /usr/local/bin
 sudo chmod 777 /usr/local/bin
 sudo chmod +x /usr/local/bin/capture_stream.sh
-sudo chmod +X /usr/local/bin/livewire_to_icecast.sh
+sudo chmod +x /usr/local/bin/livewire_to_icecast.sh
+sudo apt install jq
+sudo chmod +x /usr/local/bin/icecast_listener_monitor.sh
 
 #copy service files to /etc/systemd/system/
 sudo chmod 777 /etc/systemd/system/
 >copy files
 sudo systemctl daemon-reload
 #start services
-sudo systemctl enable livewire_to_icecast.service && systemctl start livewire_to_icecast.service
-sudo systemctl enable capture_stream.service && systemctl start capture_stream.service
+sudo systemctl enable livewire_to_icecast && systemctl start livewire_to_icecast
+sudo systemctl enable capture_stream && systemctl start capture_stream
+sudo systemctl enable icecast_listener_monitor && systemctl start icecast_listener_monitor
+
 
 
 “sudo nano /etc/network/interfaces”
 
 
 #copy fallback media
+
