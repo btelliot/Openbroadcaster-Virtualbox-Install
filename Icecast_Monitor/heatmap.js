@@ -50,7 +50,7 @@ function summarizeData(data) {
     // Check if the ListenersPeak value is not null
     if (row.Listeners!== null) {
       const date = new Date(row.Timestamp);
-      const day = (date.getDay() + 6) % 7; // Make Monday the first day of the week
+      const day = (date.getDay()); 
       const hour = date.getHours();
 
       // Store the maximum ListenersPeak value for each day and hour

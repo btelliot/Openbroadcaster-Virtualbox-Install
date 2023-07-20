@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Simple Audio Player</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f0f0f0;
+      font-family: Arial, sans-serif;
+    }
+    #playButton {
+      padding: 10px 20px;
+      font-size: 20px;
+    }
+  </style>
+</head>
+<body>
+  <button id="playButton">Play Audio</button>
+
+  <audio id="audioPlayer" preload="none" style="display: none;">
+    <source src="https://ob.cjucfm.com/preview.php?id=144860&format=mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    document.getElementById('playButton').addEventListener('click', function() {
+      var audioPlayer = document.getElementById('audioPlayer');
+      audioPlayer.play();
+    });
+  </script>
+</body>
+</html>
