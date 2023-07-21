@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+
+<head>
+	<title>CJUC Playlist Preview Tool</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+	<script src="https://cdn.jsdelivr.net/npm/amplitudejs/dist/amplitude.min.js"></script>
+	<style>
+		.footer {
+			position: fixed;
+			bottom: 0;
+			left: 0;
+			width: 100%;
+			background-color: #161616;
+			padding: 10px;
+			text-align: center;
+			font-size: 14px;
+			color: #555;
+		}
+
+		.container {
+			margin-bottom: 400px;
+		}
+
+		.now-playing-s {
+			color: #badbcc;
+			padding-right: 10px;
+		}
+
+		.header {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			text-align: center;
+		}
+
+		.progressContainer {
+			display: flex;
+			align-items: flex-end;
+			justify-content: space-between;
+			position: relative;
+		}
+
+		.displayTime {
+			position: absolute;
+		}
+
+		#nextSong {
+			position: absolute;
+			bottom: 0;
+			right: 0;
+			padding: 0px 10px 20px 0px;
+			font-size: 2.2vmin;
+			max-width: 35%;
+		}
+
+
+		#startTime {
+			left: 0;
+			bottom: 0;
+		}
+
+		#endTime {
+			right: 0;
+			bottom: 0;
+		}
+
+
+		#stopBtn {
+			height: 100px;
+			width: 100px;
+			border-radius: 100px;
+			font-size: 35px;
+		}
+
+		#skipBtn {
+			height: 40px;
+			width: 40px;
+			font-size: 20px;
+		}
+
+		#backBtn {
+			height: 40px;
+			width: 40px;
+			font-size: 20px;
+		}
+
+		#now-playing {
+			color: white;
+			font-size: 25px;
+		}
+
+		#progressBar {
+			padding: 1px;
+			width: 77%;
+			appearance: none;
+			background-color: #adb5bd;
+			border-radius: 5px;
+			outline: none;
+			transition: width 0.3s ease;
+			height: 0px;
+		}
+
+		/* CSS to style the slider thumb */
+		#progressBar::-webkit-slider-thumb {
+			appearance: none;
+			width: 10px;
+			height: 10px;
+			background-color: white;
+			border: none;
+			border-radius: 50%;
+		}
+
+		#progressBar::-moz-range-thumb {
+			appearance: none;
+			width: 10px;
+			height: 10px;
+			background-color: white;
+			border: none;
+			border-radius: 50%;
+		}
+
+		#progressBar::-ms-thumb {
+			appearance: none;
+			width: 10px;
+			height: 10px;
+			background-color: white;
+			border: none;
+			border-radius: 50%;
+		}
+
+		.alert-success {
+			--bs-alert-bg: #d1e7dd;
+			--bs-alert-border-color: #badbcc;
+			--bs-alert-link-color: #0f5132;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="header">
+		<div class="alert alert-success" id="success-alert" style="display:none">
+			<button type="button" class="close" data-dismiss="alert">x</button>
+		</div>
+	</div>
+
+	<div class="container">
+		<div class="row">
+
+			<div class="col-12">
+				<!-- search ui -->
+				<h3 style="padding-top:20px">Search Playlists</h3>
+				<div class="row no-gutters mt-3 align-items-center">
+					<div class="col col-md-12">
+						<input class="form-control border-secondary rounded-pill pr-5" type="search"
+							placeholder="Enter search terms" id="search">
+					</div>
+					<!--<div class="col col-md-2">
+				<button id="searchBtn" class="btn btn-secondary rounded-pill ml-n5" type="button">
+					<i class="fa fa-search"></i>
+				</button>
+			</div>-->
+				</div>
+			</div>
+
+			<div class="col-12">
+				<!-- search results -->
+				<div class="row no-gutters mt-3 align-items-center">
+					<div class="col col-md-10">
+						<h3 style="padding-top:20px" id="searchResults">Search Results</h3>
+					</div>
+					<div class="col col-md-2">
+						<button id="toggleTable1" class="btn btn-secondary" type="button">
+							<i class="fa fa-chevron-up"></i>
+						</button>
+					</div>
+				</div>
+
+			</div>
+			<div class="" id="searchTable">
+
+
+				<table class="table table-striped">
+					<thead>
+						<tr>
+							<th>Name</th>
+							<th>Description</th>
+							<th>Play</th>
+						</tr>
+					</thead>
+					<tbody id="results"></tbody>
+				</table>
+			</div>
+		</div>
+
+		<div class="col-12">
+			<!-- Queue -->
+			<div class="row no-gutters mt-3 align-items-center">
+				<div class="col col-md-10">
+					<h3 style="padding-top:20px" id="queueResults">Queue</h3>
+				</div>
+				<div class="col col-md-2">
+					<button id="toggleTable2" class="btn btn-secondary" type="button">
+						<i class="fa fa-chevron-up"></i>
+					</button>
+				</div>
+			</div>
+			<div class="" id="queueTable">
+				<table class="table table-striped">
+					<thead>
+						<tr>
+							<th>Item</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody id="playlist"></tbody>
+				</table>
+			</div>
+			<div class="d-flex justify-content-center">
+				<div class="spinner-grow text-success" role="status" style="display:none;" id="loadingIcon">
+					<span class="sr-only">Loading...</span>
+				</div>
+			</div>
+		</div>
+
+
+
+		<div>
+			<!--footer-->
+			<div class="footer">
+				<div id="now-playing">
+					<strong>
+						<span id="now-playing-string" class="display-6"></span>
+					</strong>
+				</div>
+				<input id="progressBar" type="range" value="0" min="0" max="100" step="1" disabled>
+				<div class="progressContainer">
+					<div class="displayTime display-6" id="startTime" style="display:none;">0:00</div>
+					<div class="displayTime display-6" id="endTime" style="display:none;">0:00</div>
+				</div>
+
+				<button type="button" class="btn btn-dark" id="backBtn"><i class="fas fa-step-backward"></i></button>
+				<button type="button" class="btn btn-light" id="stopBtn"><i class="fas fa-play"></i></button>
+				<button type="button" class="btn btn-dark" id="skipBtn"><i class="fas fa-step-forward"></i></button>
+				<div id="nextSong" class="display-6" style="display:float">No playlist loaded</div>
+
+			</div>
+		</div>
+
+
+		<!--<audio id="audioPlayer" preload="none" style="/*display: none;*/">
+			<source src="https://ob.cjucfm.com/preview.php?id=74913&format=mp3" type="audio/mpeg">
+		</audio>-->
+
+
+
+
+	</div>
+
+	<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js"></script>
+	<script>
+		var audio = new Audio();
+		//audio = document.getElementById('audioPlayer');
+		//audio.autoplay = true; 
+		//audio.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"; //short wav file
+		var playlist = [];
+		var plPosition = 0;
+		var currentSong = 0;
+
+		searchResults = document.getElementById("searchResults"); //counter for how many search results
+		queueResults = document.getElementById("queueResults"); //counter for how many items are in the playlist
+
+		nextSong = document.getElementById("nextSong");
+
+		const progressEl = document.getElementById("progressBar"); //progressBar
+		const startTime = document.getElementById("startTime");
+		const endTime = document.getElementById("endTime");
+		let mouseDownOnSlider = false;
+
+		audio.addEventListener("loadeddata", () => {
+			progressEl.value = 0;
+
+			var stime = Math.floor(0);
+			var sduration = fmtMSS(stime);
+
+			startTime.innerHTML = sduration;
+			startTime.style.display = "block";
+
+			var etime = Math.floor(audio.duration);
+			var eduration = fmtMSS(etime);
+
+			endTime.innerHTML = '-' + eduration; //time remaining
+			endTime.style.display = "block";
+		});
+
+		audio.addEventListener("timeupdate", () => {
+			if (!mouseDownOnSlider) {
+				progressEl.value = audio.currentTime / audio.duration * 100;
+
+				//update current time
+				var stime = Math.floor(audio.currentTime);
+				var sduration = fmtMSS(stime);
+				startTime.innerHTML = sduration;
+
+				var etime = Math.floor(audio.duration - audio.currentTime);
+				var eduration = fmtMSS(etime);
+				endTime.innerHTML = '-' + eduration;
+
+			}
+		});
+
+		audio.addEventListener("ended", () => {
+			playPauseButton.innerHTML = '<i class="fas fa-play"></i>';
+		});
+
+		progressEl.addEventListener("change", () => {
+			const pct = progressEl.value / 100;
+			audio.currentTime = (audio.duration || 0) * pct;
+		});
+		progressEl.addEventListener("mousedown", () => {
+			mouseDownOnSlider = true;
+		});
+		progressEl.addEventListener("mouseup", () => {
+			mouseDownOnSlider = false;
+		});
+
+		var playPauseButton = document.getElementById("stopBtn");
+		var searchInput = document.getElementById("search");
+
+		function playSong(song) {
+			if (song) {
+				var audio = new Audio();
+				audio.src = `https://ob.cjucfm.com/preview.php?id=${song.id}`;
+				audio.load();
+				audio.play();
+				playPauseButton.innerHTML = '<i class="fas fa-pause"></i>';
+			}
+		}
+
+		$('#toggleTable1').click(function () {
+			var content = $('#searchTable');
+			if (content.is(':visible')) {
+				content.slideUp();
+			} else {
+				content.slideDown();
+			}
+			$(this).find('i').toggleClass('fa-chevron-up').toggleClass('fa-chevron-down');
+		});
+
+		$('#toggleTable2').click(function () {
+			var content = $('#queueTable');
+			if (content.is(':visible')) {
+				content.slideUp();
+			} else {
+				content.slideDown();
+			}
+			$(this).find('i').toggleClass('fa-chevron-up').toggleClass('fa-chevron-down');
+		});
+
+		$('#startBtn').click(function () {
+			if (playlist.length > 0) {
+				playSong(playlist[0]);
+				playPauseButton.innerHTML = '<i class="fas fa-pause"></i>';
+			}
+		});
+
+		$('#stopBtn').click(function () {
+			//if the audio is paused, pressing the button plays it
+			if (audio.paused) {
+				audio.play();
+				playPauseButton.innerHTML = '<i class="fas fa-pause"></i>';
+			} else {
+				//otherwise it pauses it
+				audio.pause();
+				playPauseButton.innerHTML = '<i class="fas fa-play"></i>';
+			}
+			//if there is no music playing, but there is an item in the playlist
+			if (audio.currentTime == 0) {
+				if (playlist.length > 0) {
+					playSong(playlist[0]);
+					$('#now-playing-string').text(playlist[currentSong].name + ' - ' + playlist[currentSong].artist);
+
+					if (currentSong + 1 < playlist.length) {
+						nextSong.innerHTML = 'Up next: ' + playlist[currentSong + 1].name + ' - ' + playlist[currentSong + 1].artist;  //update the name of the next song
+					}
+
+					playPauseButton.innerHTML = '<i class="fas fa-pause"></i>';
+				}
+			}
+		});
+
+		$('#skipBtn').click(function () {
+			if (currentSong + 1 < playlist.length) { //if not at the end of the playlist
+				currentSong = currentSong + 1;  //update the song counter
+				insertPlayIcon(currentSong + 1);
+				playSong(playlist[currentSong]); //play the next song
+				$('#now-playing-string').text(playlist[currentSong].name + ' - ' + playlist[currentSong].artist); //update the name of the current song playing
+
+				if (currentSong + 1 < playlist.length) {
+					nextSong.innerHTML = 'Up next: ' + playlist[currentSong + 1].name + ' - ' + playlist[currentSong + 1].artist;  //update the name of the next song
+				} else if (currentSong + 1 == playlist.length) {
+					nextSong.innerHTML = 'End of playlist';
+				}
+				//do something else
+
+			}
+
+		});
+
+		$('#backBtn').click(function () {
+			currentSong = currentSong - 1;
+			if (currentSong < 0) { currentSong = 0; } //prevent from going negative
+			playSong(playlist[currentSong]);
+
+			insertPlayIcon(currentSong + 1);
+
+			$('#now-playing-string').text(playlist[currentSong].name + ' - ' + playlist[currentSong].artist);
+
+			if (currentSong + 1 < playlist.length) {
+				nextSong.innerHTML = 'Up next: ' + playlist[currentSong + 1].name + ' - ' + playlist[currentSong + 1].artist;  //update the name of the next song
+			}
+
+
+
+		});
+
+		$('#searchBtn').click(function () {
+			performSearch();
+		});
+
+		function removeFromPlaylist(id) {
+			playlist = playlist.filter(function (item) {
+				return item.id !== id;
+			});
+		}
+
+		$("#queuetable").on('click', '.removeBtn', function () {
+
+			$(this).closest('tr').remove();
+		});
+
+		$(document).on('click', '.removeBtn', function () {
+			var id = $(this).data('id');
+			$(this).closest('tr').remove();
+			removeFromPlaylist(id);
+
+			// get total duration of playlist in seconds
+			var totalDuration = playlist.reduce(function (sum, song) {
+				return sum + song.duration;
+			}, 0);
+			//format to MM:SS
+			var playlistLength = fmtMSS(totalDuration);
+			queueResults.innerHTML = 'Queue (' + playlist.length + ') ' + playlistLength;
+
+
+			nextSong.innerHTML = 'Up next: ' + playlist[currentSong + 1].name + ' - ' + playlist[currentSong + 1].artist;  //update the name of the next song
+			/*if (currentSong+2 == playlist.length ){
+				nextSong.innerHTML = 'End of playlist';
+			} */
+
+		});
+
+		searchInput.addEventListener('keydown', function (event) {
+			if (event.keyCode === 13 || event.key === 'Enter') {
+				performSearch();
+			}
+		});
+
+		function fmtMSS(s) { return (s - (s %= 60)) / 60 + (9 < s ? ':' : ':0') + s } //format time function
+
+		//function to get position in the playlist
+		function getPositionInPlaylist(playlist, id) {
+			for (let i = 0; i < playlist.length; i++) {
+				if (playlist[i].id === id) {
+					return i;
+				}
+			}
+			return -1; // Return -1 if the ID is not found in the playlist
+		}
+
+		function insertPlayIcon(rowNumber) {
+			//remove any previous play icons
+			var nowPlayingIcons = document.querySelectorAll("i.now-playing-s");
+
+			nowPlayingIcons.forEach(function (icon) {
+				icon.parentNode.removeChild(icon);
+			});
+
+			//insert new play icon
+			var table = document.getElementById("queueTable");
+			var rows = table.getElementsByTagName("tr");
+
+			if (rowNumber > 0 && rowNumber <= rows.length) {
+				var firstCell = rows[rowNumber].getElementsByTagName("td")[0];
+				var playIcon = document.createElement("i");
+				playIcon.classList.add("fas", "fa-play-circle", "play-icon", "now-playing-s");
+
+				firstCell.insertBefore(playIcon, firstCell.firstChild);
+			}
+		}
+
+		/*this function gets random media items*/
+		function getRandomMediaItems(media, num_items) {
+			//shuffle media to get random order
+			const shuffledMedia = media.slice().sort(() => Math.random() - 0.5);
+
+			//push items to array and return
+			const items = [];
+			for (let i = 0; i < num_items; i++) {
+				items.push(shuffledMedia[i]);
+			}
+
+			return items;
+		}
+
+		/* this function takes the json from the playlist, and resolves it into songs*/
+		function getDynamicSongs(filters, num_items) {
+			var data = {
+				c: "media",
+				a: "search",
+				appkey: 'MTU=:orwffbnL6l9ZeFfCAsEeJYGWKffHW+3f0/2CNiZlbzc=',
+				d: JSON.stringify({
+					save_history: true,
+					sort_by: "updated",
+					sort_dir: "desc",
+					q: {
+						mode: "advanced",
+						filters: filters
+					},
+					s: "approved",
+					l: 250,
+					o: 0,
+					my: false
+				})
+			};
+
+			return new Promise((resolve, reject) => {
+				$.ajax({
+					url: 'https://ob.cjucfm.com/api.php',
+					type: 'POST',
+					data: $.param(data),
+					success: function (response) {
+						response = JSON.parse(response);
+						var items = []
+						var media = response.data.media;
+
+						items = getRandomMediaItems(media, num_items);
+
+						resolve(items);
+					},
+					error: function (jqXHR, textStatus, errorThrown) {
+						console.error(textStatus, errorThrown);
+						reject(errorThrown);
+					}
+				});
+			});
+		}
+
+
+		function getSongInfo(id) {
+
+			return new Promise((resolve, reject) => {
+				$.ajax({
+					type: 'POST',
+					url: 'https://ob.cjucfm.com/api.php',
+					data: {
+						c: 'media',
+						a: 'get',
+						d: `{"id":${id}}`,
+						appkey: 'MTU=:orwffbnL6l9ZeFfCAsEeJYGWKffHW+3f0/2CNiZlbzc='
+					},
+					success: function (response) {
+						response = JSON.parse(response);
+						
+						resolve(response);
+						//console.log(response);
+					}
+
+
+				});
+
+			});
+
+
+		}
+
+		/*Search Function*/
+		function performSearch() {
+			$.ajax({
+				type: 'POST',
+				url: 'https://ob.cjucfm.com/api.php',
+				data: {
+					c: 'playlist',
+					a: 'search',
+					d: `{"sort_by":"updated","sort_dir":"desc","q":"${$('#search').val()}","l":250,"o":0,"my":false}`,
+					appkey: 'MTU=:orwffbnL6l9ZeFfCAsEeJYGWKffHW+3f0/2CNiZlbzc='
+					//i: '5088',
+					//k: 'RtSAx5TOM6bHRPcz7V1HKYvseGQRks2QluexVGyF8Gn7DcbCBtLgzCNWpLcs7MF',
+				},
+				success: function (response) {
+					var playlists = [];
+					response = JSON.parse(response);
+					console.log(response);
+					searchResults.innerHTML = "Search Results (" + response.data.num_results + ")";
+					var html = '';
+					response.data.playlists.forEach(function (playlist) {
+
+
+						playlists.push({
+							id: playlist.id,
+							name: playlist.name,
+							description: playlist.description
+						});
+						html += `<tr>
+              <td>${playlist.name}</td>
+              <td>${playlist.description}</td>
+              <td><button class="playBtn" data-id="${playlist.id}" data-name="${playlist.name}" data-description="${playlist.description}"><i class="fa fa-play"></i></button></td>
+            </tr>`;
+					});
+					$('#results').html(html);
+				},
+			});
+		}
+
+		/*load Playlist*/
+		function loadPlaylist(pl) {
+			//show loading icon
+			$("#loadingIcon").show();
+
+			//get playlist json
+
+
+
+			$.ajax({
+				type: 'POST',
+				url: 'https://ob.cjucfm.com/api.php',
+				data: {
+					c: 'playlist',
+					a: 'get',
+					d: `{"id":"${pl}"}`,
+					appkey: 'MTU=:orwffbnL6l9ZeFfCAsEeJYGWKffHW+3f0/2CNiZlbzc='
+				},
+				success: async function (response) {
+					var items = [];
+					var table = [];
+					response = JSON.parse(response);
+					console.log(response);
+					queueResults.innerHTML = "Queue (" + response.data.items.length + ")";
+
+					// Wait for all item processing promises to resolve
+					await Promise.all(response.data.items.map(async function (item) {
+
+						var ord = item.ord;
+
+						items.push({
+							artist: item.artist,
+							duration: item.duration,
+							id: item.id,
+							ord: item.ord,
+							owner_id: item.owner_id,
+							properties: item.properties,
+							status: item.status,
+							title: item.title,
+							type: item.type
+						});
+
+
+
+
+						//if statement to generate table
+
+						//if station id
+						if (item.type == 'station_id') {
+							//pick a random station id
+
+							const stationId = globalStationIds[Math.floor(Math.random() * globalStationIds.length)];
+
+							const stationIdInfo = await getSongInfo(stationId);
+
+							sid = stationIdInfo.data;
+
+							var html = `<tr>
+											<td><strong>${sid.title}</strong></br>${sid.artist}</td>
+											<td><button class="queuePlayBtn" data-id="${stationId}" data-title="${sid.title}" data-artist="${sid.artist}"><i class="fa fa-play"></i></button></td>
+										</tr>`;
+
+							// push to html table object
+							table.push({
+								ord: ord,
+								row: html
+							});
+
+
+							//add to playlist queue
+							playlist.push({
+								ord: ord,
+								id: stationId,
+								url: `https://ob.cjucfm.com/preview.php?id=${stationId}&format=mp3`
+							});
+
+							//if dynamic playlist
+						} else if (item.type == 'dynamic') {
+							var num_items = item.properties.num_items;
+							var filters = item.properties.query.filters;
+
+							// Wait for getDynamicSongs to finish
+							const dynamicSongs = await getDynamicSongs(filters, num_items);
+
+							dynamicSongs.forEach(item => {
+								var html = `<tr>
+												<td><strong>${item.title}</strong><br>${item.artist}</td>
+												<td><button class="queuePlayBtn" data-id="${item.id}" data-title="${item.title}" data-artist="${item.artist}"><i class="fa fa-play"></i></button></td>
+											</tr>`;
+
+								// push to html table object
+								table.push({
+									ord: ord,
+									row: html
+								});
+
+								playlist.push({
+									ord: ord,
+									id: item.id,
+									name: item.title,
+									artist: item.artist,
+									album: item.album,
+									duration: item.seconds,
+									url: `https://ob.cjucfm.com/preview.php?id=${item.id}&format=mp3`
+								});
+							});
+						} else if (item.type == 'audio') {
+							var html = `<tr>
+											<td><strong>${item.title}</strong><br>${item.artist}</td>
+											<td><button class="queuePlayBtn" data-id="${item.id}" data-title="${item.title}" data-artist="${item.artist}"><i class="fa fa-play"></i></button></td>
+										</tr>`;
+							// push to html table object
+							table.push({
+								ord: ord,
+								row: html
+							});
+
+							playlist.push({
+								ord: ord,
+								id: item.id,
+								name: item.title,
+								artist: item.artist,
+								album: item.album,
+								duration: item.seconds,
+								url: `https://ob.cjucfm.com/preview.php?id=${item.id}&format=mp3`
+							});
+
+						}
+
+
+
+						//make sure the table has finished loading
+					})).then(() => {
+						// sort the table
+						table.sort((a, b) => a.ord - b.ord);
+						playlist.sort((a, b) => a.ord - b.ord);
+
+						//append the table to the #playlist
+						table.forEach(item => {
+							$('#playlist').append(item.row);
+						});
+
+						//hide the loading icon
+						$("#loadingIcon").hide();
+
+
+					});
+
+				},
+			});
+
+
+		}
+
+
+		//get list of station ids for player
+		function getStationIds() {
+			return new Promise((resolve, reject) => {
+				$.ajax({
+					type: 'POST',
+					url: 'https://ob.cjucfm.com/api.php',
+					data: {
+						c: 'player',
+						a: 'get',
+						d: '{"id":"1"}',
+						appkey: 'MTU=:orwffbnL6l9ZeFfCAsEeJYGWKffHW+3f0/2CNiZlbzc='
+					},
+					success: function (response) {
+						var ids = [];
+						//console.log(response);
+						response = JSON.parse(response);
+						ids = response.data.station_ids;
+
+						resolve(ids);
+					},
+					error: function (error) {
+						reject(error);
+					}
+				});
+			});
+		}
+
+		$(document).on('click', '.queuePlayBtn', function () {
+			//function for play button in playlist queue
+			var id = $(this).data('id');
+			var title = $(this).data('title');
+			var artist = $(this).data('artist');
+			var album = $(this).data('album');
+			audio.src = `https://ob.cjucfm.com/preview.php?id=${id}&format=mp3`;
+			audio.load();
+			audio.play().catch(function (error) {
+				console.error('Error playing audio:', error);
+			});
+
+			currentSong = getPositionInPlaylist(playlist, id);
+
+			insertPlayIcon(currentSong + 1);
+
+
+			if (currentSong + 1 < playlist.length) {
+				nextSong.innerHTML = "Up next: " + playlist[currentSong + 1].name + ' - ' + playlist[currentSong + 1].artist;
+			} else {
+				nextSong.innerHTML = 'End of playlist';
+			}
+
+			playPauseButton.innerHTML = '<i class="fas fa-pause"></i>';
+			$('#now-playing-string').text(title + ' - ' + artist);
+		});
+
+		$(document).on('click', '.playBtn', function () {
+			var id = $(this).data('id');
+			var name = $(this).data('name');
+			var description = $(this).data('description');
+
+			//reset queueTable
+			$('#playlist').html('');
+
+			//code to resolve playlist
+			loadPlaylist(id);
+
+			/*  load audio
+			audio.src = `https://ob.cjucfm.com/preview.php?id=${id}&format=mp3`;
+			audio.load();
+			audio.play().catch(function(error) {
+			  console.error('Error playing audio:', error);
+			});
+			playPauseButton.innerHTML = '<i class="fas fa-pause"></i>';
+			$('#now-playing-string').text(title + ' - ' + artist);*/
+		});
+
+		$(document).on('click', '.addBtn', function () {
+			var id = $(this).data('id');
+			var title = $(this).data('title');
+			var artist = $(this).data('artist');
+			var album = $(this).data('album');
+			var year = $(this).data('year');
+			var length = $(this).data('length');
+			var seconds = $(this).data('seconds');
+
+			$("#success-alert").fadeTo(2000, 500).slideUp(500, function () {
+				$("#success-alert").slideUp(500);
+			});
+
+			playlist.push({
+				id: id,
+				name: title,
+				artist: artist,
+				album: album,
+				duration: seconds,
+				url: `https://ob.cjucfm.com/preview.php?id=${id}&format=mp3`
+
+			});
+
+			// get total duration of playlist in seconds
+			var totalDuration = playlist.reduce(function (sum, song) {
+				return sum + song.duration;
+			}, 0);
+
+			//format to MM:SS
+			var playlistLength = fmtMSS(totalDuration);
+
+			if (playlist.length == 0) { //if the playlist is empty, update the next song
+				nextSong.innerHTML = "Up next: " + playlist[currentSong].name + ' - ' + playlist[currentSong].artist;
+			} else if (currentSong + 2 == playlist.length) {  //if the playlist isn't empty, don't update unless you are at the end of the playlist
+				nextSong.innerHTML = "Up next: " + title + ' - ' + artist;
+			}
+
+
+
+			queueResults.innerHTML = 'Queue (' + playlist.length + ') ' + playlistLength;
+			var success = '<strong>' + title + ' - ' + artist + '</strong> was added to the queue';
+			var html = `<tr data-id=${id}>
+        <td>${title}</td>
+        <td>${artist}</td>
+		<td>${album}</td>
+		<td>${year}</td>
+		<td>${length}</td>
+		<td><button class="queuePlayBtn" data-id="${id}" data-title="${title}" data-artist="${artist}"><i class="fa fa-play"></i></button></td>
+		<td><button class="removeBtn" data-id="${id}" data-title="${title}" data-artist="${artist}"><i class="fa fa-xmark"></i></button></td>
+        </tr>`;
+			$('#playlist').append(html);
+			$('#success-alert').html(success);
+		});
+
+		let globalStationIds = [];
+
+		async function fetchIDs() {
+			try {
+				const stationIds = await getStationIds();
+				// Assign the stationIds array to the global variable
+				globalStationIds = stationIds;
+				// Use the globalStationIds array here or perform any other operations
+				//console.log(globalStationIds);
+			} catch (error) {
+				// Handle the error here
+				console.error(error);
+			}
+		}
+
+		// Call the fetchIDs function
+		fetchIDs();
+
+	</script>
+</body>
+
+
+
+</html>
